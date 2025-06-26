@@ -890,28 +890,36 @@ def test_ild_with_sliding_hinge():
     assert b.ild_moment.subs(a, 3) == -Rational(12, 7)
 
 def test_apply_load_ramp_start_greater_than_end():
-
-    #issue #28174
+    # issue #28174
 
     E, I = symbols('E I')
 
-    #order 1
+    # order 1 - fullbeam
     b = Beam(10, E, I)
     b.apply_load(5, 10, 1, end=0)
-    expected_load = 50*SingularityFunction(x, 0, 0) - 5*SingularityFunction(x, 0, 1) + 5*SingularityFunction(x, 10, 1)
+    expected_load = 50*SingularityFunction(x, 0, 0) \
+                    - 5*SingularityFunction(x, 0, 1) \
+                    + 5*SingularityFunction(x, 10, 1)
     assert simplify(b.load - expected_load) == 0
 
-    #order 3
+    # order 3 - full beam
     b1 = Beam(10, E, I)
     b1.apply_load(5, 10, 3, end=0)
-    expected_load = 5000*SingularityFunction(x, 0, 0) - 1500*SingularityFunction(x, 0, 1) + 150*SingularityFunction(x, 0, 2) - 5*SingularityFunction(x, 0, 3) + 5*SingularityFunction(x, 10, 3)
+    expected_load = 5000*SingularityFunction(x, 0, 0) \
+                    - 1500*SingularityFunction(x, 0, 1) \
+                    + 150*SingularityFunction(x, 0, 2) \
+                    - 5*SingularityFunction(x, 0, 3) \
+                    + 5*SingularityFunction(x, 10, 3)
     assert simplify(b1.load - expected_load) == 0
 
-    #order 1 with load on certain section of beam
+    # order 1 - section of beam
     b2 = Beam(10, E, I)
     b2.apply_load(5, 6, 1, end=2)
-    expected_load = 20*SingularityFunction(x, 2, 0) - 5*SingularityFunction(x, 2, 1) + 5*SingularityFunction(x, 6, 1)
+    expected_load = 20*SingularityFunction(x, 2, 0) \
+                    - 5*SingularityFunction(x, 2, 1) \
+                    + 5*SingularityFunction(x, 6, 1)
     assert simplify(b2.load - expected_load) == 0
+
 
 
 def test_Beam3D():
