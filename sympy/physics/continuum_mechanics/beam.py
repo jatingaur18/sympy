@@ -2,7 +2,7 @@
 This module can be used to solve 2D beam bending problems with
 singularity functions in mechanics.
 """
-
+from sympy.simplify import simplify
 from sympy.core import S, Symbol, diff, symbols
 from sympy.core.add import Add
 from sympy.core.expr import Expr
@@ -742,18 +742,15 @@ class Beam:
         value = sympify(value)
         start = sympify(start)
         order = sympify(order)
+        start = simplify(start)
+        end = simplify(end)
 
         self._applied_loads.append((value, start, order, end))
         self._load += value*SingularityFunction(x, start, order)
         self._original_load += value*SingularityFunction(x, start, order)
 
         if end!=None:
-            if start - end>0:
-                # If load is applied in reverse (start > end), reverse the effect by applying a negative load at the end.
-                self._handle_end(x, -value, start, order, end,type = "remove")
-            # load has an end point within the length of the beam.
-            else:
-                self._handle_end(x, value, start, order, end, type="apply")
+            self._handle_end(x, value, start, order, end, type="apply")
 
     def remove_load(self, value, start, order, end=None):
         """
@@ -806,6 +803,8 @@ class Beam:
         value = sympify(value)
         start = sympify(start)
         order = sympify(order)
+        start = simplify(start)
+        end = simplify(end)
 
         if (value, start, order, end) in self._applied_loads:
             self._load -= value*SingularityFunction(x, start, order)
@@ -816,11 +815,7 @@ class Beam:
             raise ValueError(msg)
 
         if end!=None:
-            if start - end>0:
-                self._handle_end(x, -value, start, order, end,type = "apply")
-            # load has an end point within the length of the beam.
-            else:
-                self._handle_end(x, value, start, order, end, type="remove")
+            self._handle_end(x, value, start, order, end, type="remove")
 
     def _handle_end(self, x, value, start, order, end, type):
         """
@@ -836,6 +831,14 @@ class Beam:
         # NOTE : A Taylor series can be used to define the summation of
         # singularity functions that subtract from the load past the end
         # point such that it evaluates to zero past 'end'.
+
+        if simplify(start - end)>0:
+            value=-value
+            if(type=="apply"):
+                type = "remove"
+            else:
+                type = "apply"
+
         f = value*x**order
 
         if type == "apply":
