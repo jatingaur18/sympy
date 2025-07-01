@@ -742,8 +742,6 @@ class Beam:
         value = sympify(value)
         start = sympify(start)
         order = sympify(order)
-        start = simplify(start)
-        end = simplify(end)
 
         self._applied_loads.append((value, start, order, end))
         self._load += value*SingularityFunction(x, start, order)
@@ -803,8 +801,6 @@ class Beam:
         value = sympify(value)
         start = sympify(start)
         order = sympify(order)
-        start = simplify(start)
-        end = simplify(end)
 
         if (value, start, order, end) in self._applied_loads:
             self._load -= value*SingularityFunction(x, start, order)
