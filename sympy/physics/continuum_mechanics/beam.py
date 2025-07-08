@@ -828,7 +828,7 @@ class Beam:
         # singularity functions that subtract from the load past the end
         # point such that it evaluates to zero past 'end'.
 
-        if simplify(start - end)>0:
+        if simplify(start - end).is_positive:
             value=-value
             if(type=="apply"):
                 type = "remove"
