@@ -5,7 +5,7 @@ from sympy.core.symbol import (Symbol, symbols)
 from sympy.sets.sets import Interval
 from sympy.simplify.simplify import simplify
 from sympy.physics.continuum_mechanics.beam import Beam
-from sympy.functions import SingularityFunction, Piecewise, meijerg, Abs, log
+from sympy.functions import SingularityFunction, Piecewise, meijerg, Abs, log,factorial
 from sympy.testing.pytest import raises
 from sympy.physics.units import meter, newton, kilo, giga, milli
 from sympy.physics.continuum_mechanics.beam import Beam3D
@@ -919,6 +919,24 @@ def test_apply_load_ramp_start_greater_than_end():
                     - 5*SingularityFunction(x, 2, 1) \
                     + 5*SingularityFunction(x, 6, 1)
     assert simplify(b2.load - expected_load) == 0
+
+
+def test_apply_load_symbolic_start_end():
+    # Symbolic test for start > end case
+    E, I = symbols('E I')
+    a, b_ = symbols('a b', real=True)
+
+    beam = Beam(b_, E, I)
+    beam.apply_load(5, b_, 1, end=a)
+
+    f = 5 * x**1
+    expected_load = (
+        f.subs(x, b_ - a) * SingularityFunction(x, a, 0)
+        - f.diff(x, 1).subs(x, b_ - a) * SingularityFunction(x, a, 1) / factorial(1)
+        + 5 * SingularityFunction(x, b_, 1)
+    )
+
+    assert simplify(beam.load - expected_load) == 0
 
 
 
